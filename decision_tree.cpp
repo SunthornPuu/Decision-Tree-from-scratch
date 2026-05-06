@@ -1,4 +1,5 @@
-#include "formula.cpp"
+//decision_tree
+
 #include "vector"
 #include "algorithm"
 using namespace std;
@@ -26,8 +27,16 @@ class DecisionTree{
                 Node root;
                 int resort(int l,int r,int feature_index,double feature_value ){
                         vector<pair<double,vector<double>>> resorted(r-l);
-                        for(int i=l;i<r;i++)resorted[i-l]=  mp(X[i][feature_index],X[i]);
-                        sort(resorted.begin(),resorted.end());                              
+                        for(int i=l;i<r;i++)resorted[i-l] =  mp(X[i][feature_index],X[i]);
+                        sort(resorted.begin(),resorted.end());
+                        for(int i=l;i<r;i++)X[i] = resorted[i-l].s;
+                        int matched = 0;
+                        while(l<r){
+                                int m = (l+r)/2;
+                                if(X[m][feature_index]<=feature_value)matched=m,l=m+1;
+                                else r=m-1;
+                        }
+                        return matched;                
                 }
 
                 void construct(Node &node, int l, int r,int depth){
@@ -69,8 +78,14 @@ class DecisionTree{
                         node.right = &right;
                         node.property_index = best_split.f;
                         node.property_value = best_split.s;
-
                 }
+
+                double query(vector<double> input,Node* node){
+                        if(node->property_index == -1)return node->value;
+                        if(input[node->property_index] <= node->property_value)query(input,node->left);
+                        else query(input,node->right);
+                }
+
         public:
                 DecisionTree(vector<vector<double>> given_set, int max_depth = 999999, int min_samples_split = 1){
                         N = given_set.size();
@@ -85,8 +100,8 @@ class DecisionTree{
                         construct(root,0,N-1,1);
                 }
 
+                double predict(vector<double> test){
+                        return query(test,&root);
+                }
+
 };
-
-int main(){
-
-}
